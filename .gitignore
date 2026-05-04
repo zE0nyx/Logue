@@ -1,0 +1,17 @@
+# Virual Env
+Keylogger/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs
+Logs/
+
+#Secrets
+.env
+
+# IDE
+.vscode/
+.idea/
+.dist/

