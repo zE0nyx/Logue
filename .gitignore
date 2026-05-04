@@ -5,8 +5,9 @@ Keylogger/
 __pycache__/
 *.pyc
 
-# Logs
+# Dirs
 Logs/
+Testing/
 
 #Secrets
 .env

