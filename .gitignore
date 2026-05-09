@@ -1,5 +1,6 @@
 # Virual Env
 Keylogger/
+Logue_venv/
 
 # Python cache
 __pycache__/
@@ -8,6 +9,7 @@ __pycache__/
 # Dirs
 Logs/
 Testing/
+SysInfo/
 
 #Secrets
 .env

